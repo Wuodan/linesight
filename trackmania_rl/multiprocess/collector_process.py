@@ -65,10 +65,11 @@ def collector_process_fn(
     # ========================================================
     # Warmup pytorch and numba
     # ========================================================
+    rng = np.random.default_rng(42)
     for _ in range(5):
         inferer.infer_network(
-            np.random.randint(low=0, high=255, size=(1, config_copy.H_downsized, config_copy.W_downsized), dtype=np.uint8),
-            np.random.rand(config_copy.float_input_dim).astype(np.float32),
+            rng.integers(low=0, high=255, size=(1, config_copy.H_downsized, config_copy.W_downsized), dtype=np.uint8),
+            rng.random(config_copy.float_input_dim).astype(np.float32),
         )
     # game_instance_manager.update_current_zone_idx(0, zone_centers, np.zeros(3))
 
