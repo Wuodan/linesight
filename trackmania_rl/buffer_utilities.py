@@ -13,7 +13,7 @@ from torch import Tensor
 from torchrl.data import ListStorage, ReplayBuffer
 from torchrl.data.replay_buffers.samplers import PrioritizedSampler, RandomSampler
 from torchrl.data.replay_buffers.storages import Storage
-from torchrl.data.replay_buffers.utils import INT_CLASSES, _to_numpy
+from torchrl.data.replay_buffers.utils import INT_CLASSES
 
 from config_files import config_copy
 
@@ -25,7 +25,6 @@ to_torch_dtype = {
     "int": torch.int,
     "float64": torch.float32,
 }
-
 
 def fast_collate_cpu(batch, attr_name):
     elem = getattr(batch[0], attr_name)
@@ -192,6 +191,7 @@ class CustomPrioritizedSampler(PrioritizedSampler):
         self._default_priority_ratio = default_priority_ratio
         self._uninitialized_memories = 0.0
         self._rng = np.random.default_rng(42)
+        self._sum_tree = None
 
     @property
     def default_priority(self) -> float:
@@ -248,9 +248,9 @@ class CustomPrioritizedSampler(PrioritizedSampler):
         else:
             if not (isinstance(priority, float) or len(priority) == 1 or len(index) == len(priority)):
                 raise RuntimeError("priority should be a number or an iterable of the same " "length as index")
-            index = _to_numpy(index)
+            index = to_numpy(index)
             if not(isinstance(priority, float)):
-                priority = _to_numpy(priority)
+                priority = to_numpy(priority)
             # We track the _approximate_ number of memories in the buffer that have default priority :
             self._uninitialized_memories -= 0.3 * len(index)
         priority = np.power(priority + self._eps, self._alpha)
@@ -276,17 +276,17 @@ class CustomPrioritizedSampler(PrioritizedSampler):
 
 
 def copy_buffer_content_to_other_buffer(source_buffer: ReplayBuffer, target_buffer: ReplayBuffer) -> None:
-    assert source_buffer._storage.max_size <= target_buffer._storage.max_size
+    assert source_buffer.storage.max_size <= target_buffer.storage.max_size
 
-    target_buffer.extend(source_buffer._storage._storage)
+    target_buffer.extend(source_buffer.storage._storage)
 
-    if isinstance(source_buffer._sampler, CustomPrioritizedSampler) and isinstance(target_buffer._sampler, CustomPrioritizedSampler):
-        target_buffer._sampler._average_priority = source_buffer._sampler._average_priority
-        target_buffer._sampler._uninitialized_memories = source_buffer._sampler._uninitialized_memories
+    if isinstance(source_buffer.sampler, CustomPrioritizedSampler) and isinstance(target_buffer.sampler, CustomPrioritizedSampler):
+        target_buffer.sampler._average_priority = source_buffer.sampler.average_priority
+        target_buffer.sampler._uninitialized_memories = source_buffer.sampler.uninitialized_memories
 
-    if isinstance(source_buffer._sampler, PrioritizedSampler) and isinstance(target_buffer._sampler, PrioritizedSampler):
+    if isinstance(source_buffer.sampler, PrioritizedSampler) and isinstance(target_buffer.sampler, PrioritizedSampler):
         for i in range(len(source_buffer)):
-            target_buffer._sampler._sum_tree[i] = source_buffer._sampler._sum_tree.at(i)
+            target_buffer.sampler.sum_tree[i] = source_buffer.sampler.sum_tree.at(i)
 
 
 def make_buffers(buffer_size: int) -> tuple[ReplayBuffer, ReplayBuffer]:
@@ -319,3 +319,6 @@ def resize_buffers(buffer: ReplayBuffer, buffer_test: ReplayBuffer, new_buffer_s
     copy_buffer_content_to_other_buffer(buffer, new_buffer)
     copy_buffer_content_to_other_buffer(buffer_test, new_buffer_test)
     return new_buffer, new_buffer_test
+
+def to_numpy(data: Tensor | float) -> np.ndarray | float:
+    return data.detach().cpu().numpy() if isinstance(data, torch.Tensor) else data
