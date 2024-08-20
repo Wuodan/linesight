@@ -317,7 +317,7 @@ def distribution_curves(buffer, save_dir, online_network, target_network):
         quantiles_output = np.sort(quantiles_output.ravel())
         quantiles_target = np.sort(quantiles_target.ravel())
 
-        if (np.min(quantiles_output) == np.max(quantiles_output)) and (np.min(quantiles_output) == 0.0):
+        if np.min(quantiles_output) == np.max(quantiles_output) and _is_min_close_to_zero(quantiles_output):
             # terminal transition, can't be interpreted as long term
             continue
 
@@ -393,3 +393,7 @@ def distribution_curves(buffer, save_dir, online_network, target_network):
             )
         ).save(save_dir / "distribution_curves" / f"{i}_{buffer.storage[i].n_steps}.png")
         plt.close()
+
+
+def _is_min_close_to_zero(quantiles_output):
+    return np.isclose(np.min(quantiles_output), 0.0, rtol=1e-09, atol=1e-09)
