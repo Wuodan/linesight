@@ -51,7 +51,6 @@ class TMInterface:
     def __init__(self, port: int):
         self.port = port
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        pass
 
     def close(self):
         self.sock.sendall(struct.pack("i", MessageType.C_SHUTDOWN))
