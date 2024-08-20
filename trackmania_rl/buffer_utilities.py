@@ -77,9 +77,10 @@ def buffer_collate_function(batch):
         )
     )
 
+    rng = np.random.default_rng(42)
     temporal_mini_race_current_time_actions = (
         np.abs(
-            np.random.randint(
+            rng.integers(
                 low=-config_copy.oversample_long_term_steps + config_copy.oversample_maximum_term_steps,
                 high=config_copy.temporal_mini_race_duration_actions + config_copy.oversample_maximum_term_steps,
                 size=(len(state_img),),
@@ -190,6 +191,7 @@ class CustomPrioritizedSampler(PrioritizedSampler):
         self._average_priority = None
         self._default_priority_ratio = default_priority_ratio
         self._uninitialized_memories = 0.0
+        self._rng = np.random.default_rng(42)
 
     @property
     def default_priority(self) -> float:
@@ -206,7 +208,7 @@ class CustomPrioritizedSampler(PrioritizedSampler):
         self._average_priority = p_sum / len(storage)
         if p_sum <= 0:
             raise RuntimeError("negative p_sum")
-        mass = np.random.uniform(0.0, p_sum, size=batch_size)
+        mass = self._rng.uniform(0.0, p_sum, size=batch_size)
         index = self._sum_tree.scan_lower_bound(mass)
         if not isinstance(index, np.ndarray):
             index = np.array([index])

@@ -412,12 +412,13 @@ class Inferer:
 
         q_values = self.infer_network(img_inputs_uint8, float_inputs).mean(axis=0)
         r = random.random()
+        rng = np.random.default_rng(42)
 
         if self.is_explo and r < self.epsilon:
             # Choose a random action
-            get_argmax_on = np.random.randn(*q_values.shape)
+            get_argmax_on = rng.standard_normal(*q_values.shape)
         elif self.is_explo and r < self.epsilon + self.epsilon_boltzmann:
-            get_argmax_on = q_values + self.tau_epsilon_boltzmann * np.random.randn(*q_values.shape)
+            get_argmax_on = q_values + self.tau_epsilon_boltzmann * rng.standard_normal(*q_values.shape)
         else:
             get_argmax_on = q_values
 
