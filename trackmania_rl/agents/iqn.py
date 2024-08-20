@@ -146,6 +146,10 @@ class IQN_Network(torch.nn.Module):
 
         return Q, tau
 
+    def to(self, *args, **kwargs):
+        super().to(*args, **kwargs)
+        return self
+
 
 @torch.compile(disable=not config_copy.is_linux, dynamic=False)
 def iqn_loss(targets: torch.Tensor, outputs: torch.Tensor, tau_outputs: torch.Tensor, num_quantiles: int, batch_size: int):
@@ -434,7 +438,7 @@ class Inferer:
         )
 
 
-def make_untrained_iqn_network(jit: bool, is_inference: bool) -> Tuple[torch.nn.Module, torch.nn.Module]:
+def make_untrained_iqn_network(jit: bool, is_inference: bool) -> Tuple[IQN_Network, IQN_Network]:
     """
     Constructs two identical copies of the IQN network.
 
@@ -464,6 +468,6 @@ def make_untrained_iqn_network(jit: bool, is_inference: bool) -> Tuple[torch.nn.
     else:
         model = copy.deepcopy(uncompiled_model)
     return (
-        model.to("cuda", memory_format=torch.channels_last).train(),
-        uncompiled_model.to("cuda", memory_format=torch.channels_last).train(),
+        model.to(device="cuda", memory_format=torch.channels_last).train(),
+        uncompiled_model.to(device="cuda", memory_format=torch.channels_last).train(),
     )
