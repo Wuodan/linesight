@@ -90,7 +90,7 @@ class TMInterface:
 
     def get_simulation_state(self):
         self.sock.sendall(struct.pack("i", MessageType.C_GET_SIMULATION_STATE))
-        state_length = self._read_int32()
+        state_length = self.read_int32()
         state = SimStateData(self.sock.recv(state_length, socket.MSG_WAITALL))
         state.cp_data.resize(CheckpointData.cp_states_field, state.cp_data.cp_states_length)
         state.cp_data.resize(CheckpointData.cp_times_field, state.cp_data.cp_times_length)
@@ -119,7 +119,7 @@ class TMInterface:
 
     def race_finished(self):
         self.sock.sendall(struct.pack("i", MessageType.C_RACE_FINISHED))
-        a = self._read_int32()
+        a = self.read_int32()
         return a
 
     def request_frame(self, W: int, H: int):
@@ -140,15 +140,15 @@ class TMInterface:
 
     def is_in_menus(self):
         self.sock.sendall(struct.pack("i", MessageType.C_IS_IN_MENUS))
-        return self._read_int32() > 0
+        return self.read_int32() > 0
 
     def get_inputs(self):
         self.sock.sendall(struct.pack("i", MessageType.C_GET_INPUTS))
-        string_length = self._read_int32()
+        string_length = self.read_int32()
         return self.sock.recv(string_length, socket.MSG_WAITALL).decode("utf-8")
 
-    def _respond_to_call(self, response_type):
+    def respond_to_call(self, response_type):
         self.sock.sendall(struct.pack("i", np.int32(response_type)))
 
-    def _read_int32(self):
+    def read_int32(self):
         return struct.unpack("i", self.sock.recv(4, socket.MSG_WAITALL))[0]
