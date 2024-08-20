@@ -29,34 +29,34 @@ def main():
                 print(e)
 
     while True:
-        msgtype = iface._read_int32()
+        msgtype = iface.read_int32()
         # =============================================
         #        READ INCOMING MESSAGES
         # =============================================
         if msgtype == int(MessageType.SC_RUN_STEP_SYNC):
-            _time = iface._read_int32()
+            _time = iface.read_int32()
             # ============================
             # BEGIN ON RUN STEP
             # ============================
             # ============================
             # END ON RUN STEP
             # ============================
-            iface._respond_to_call(msgtype)
+            iface.respond_to_call(msgtype)
         elif msgtype == int(MessageType.SC_CHECKPOINT_COUNT_CHANGED_SYNC):
-            current = iface._read_int32()
-            target = iface._read_int32()
+            current = iface.read_int32()
+            target = iface.read_int32()
             # ============================
             # BEGIN ON CP COUNT
             # ============================
             # ============================
             # END ON CP COUNT
             # ============================
-            iface._respond_to_call(msgtype)
+            iface.respond_to_call(msgtype)
         elif msgtype == int(MessageType.SC_LAP_COUNT_CHANGED_SYNC):
-            iface._read_int32()
-            iface._respond_to_call(msgtype)
+            iface.read_int32()
+            iface.respond_to_call(msgtype)
         elif msgtype == int(MessageType.SC_REQUESTED_FRAME_SYNC):
-            iface._respond_to_call(msgtype)
+            iface.respond_to_call(msgtype)
         elif msgtype == int(MessageType.C_SHUTDOWN):
             iface.close()
         elif msgtype == int(MessageType.SC_ON_CONNECT_SYNC):
@@ -67,7 +67,7 @@ def main():
                 # print(
                 #     f"add_trigger {vcp[i][0] - 0.4:.2f} {vcp[i][1] - 0.4:.2f} {vcp[i][2] - 0.4:.2f} {vcp[i][0] + 0.4:.2f} {vcp[i][1] + 0.4:.2f} {vcp[i][2] + 0.4:.2f}"
                 # )
-            iface._respond_to_call(msgtype)
+            iface.respond_to_call(msgtype)
         else:
             pass
 

@@ -211,10 +211,10 @@ def main():
                     time.sleep(0.1)
                     press_enter()
         if iface.registered:
-            msgtype = iface._read_int32()
+            msgtype = iface.read_int32()
             if msgtype == int(MessageType.SC_RUN_STEP_SYNC):
                 # print("On step")
-                _time = iface._read_int32()
+                _time = iface.read_int32()
                 if not give_up_signal_has_been_sent:
                     iface.execute_command("load " + input_files[current_input_idx])
                     iface.give_up()
@@ -223,25 +223,25 @@ def main():
                     # expecting_replay_file = True
                     iface.execute_command("finish")
                     # request_map(iface,args.map_path)
-                iface._respond_to_call(msgtype)
+                iface.respond_to_call(msgtype)
             elif msgtype == int(MessageType.SC_CHECKPOINT_COUNT_CHANGED_SYNC):
                 # print("On CP")
-                current = iface._read_int32()
-                target = iface._read_int32()
+                current = iface.read_int32()
+                target = iface.read_int32()
                 if current == target and not expecting_replay_file:  # Run finished
                     expecting_replay_file = True
                     # press_enter()
                     iface.close()
                     # iface.prevent_simulation_finish()
                 else:
-                    iface._respond_to_call(msgtype)
+                    iface.respond_to_call(msgtype)
             elif msgtype == int(MessageType.SC_LAP_COUNT_CHANGED_SYNC):
                 # print("On lap")
-                iface._read_int32()
-                iface._read_int32()
-                iface._respond_to_call(msgtype)
+                iface.read_int32()
+                iface.read_int32()
+                iface.respond_to_call(msgtype)
             elif msgtype == int(MessageType.SC_REQUESTED_FRAME_SYNC):
-                iface._respond_to_call(msgtype)
+                iface.respond_to_call(msgtype)
             elif msgtype == int(MessageType.C_SHUTDOWN):
                 iface.close()
             elif msgtype == int(MessageType.SC_ON_CONNECT_SYNC):
@@ -262,7 +262,7 @@ def main():
                     map_loaded = True
                 # else:
                 #    need_to_get_out_of_menu = True
-                iface._respond_to_call(msgtype)
+                iface.respond_to_call(msgtype)
             else:
                 pass
     close_game(tm_process_id)
