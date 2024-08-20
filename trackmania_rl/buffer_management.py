@@ -3,8 +3,8 @@ This file's main entry point is the function fill_buffer_from_rollout_with_n_ste
 Its main inputs are a rollout_results object (obtained from a GameInstanceManager object), and a buffer to be filled.
 It reassembles the rollout_results object into transitions, as defined in /trackmania_rl/experience_replay/experience_replay_interface.py
 """
-import math
 import random
+from sys import maxsize
 
 import numpy as np
 from torchrl.data import ReplayBuffer
@@ -108,7 +108,7 @@ def fill_buffer_from_rollout_with_n_steps_rule(
 
         # Get action that was played
         action = rollout_results["actions"][i]
-        terminal_actions = float((n_frames - 1) - i) if "race_time" in rollout_results else math.inf
+        terminal_actions = n_frames - 1 - i if "race_time" in rollout_results else maxsize
         next_state_has_passed_finish = ((i + n_steps) == (n_frames - 1)) and ("race_time" in rollout_results)
 
         if not next_state_has_passed_finish:
